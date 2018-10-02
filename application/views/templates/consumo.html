@@ -1,0 +1,177 @@
+<div class="row">
+  <div class="col-lg-12 margin-tb">
+    <div class="pull-left">
+      <h1>Gerenciamento de Consumo</h1>
+    </div>
+    <div class="pull-right" style="padding-top:30px">
+      <div class="box-tools" style="display:inline-table">
+        <div class="input-group">
+          <input type="text" class="form-control input-sm ng-valid ng-dirty" placeholder="Buscar" ng-change="searchDB()" ng-model="searchText" name="table_search" title="" tooltip="" data-original-title="Quantidade mínima de caracteres é 3.">
+          <span class="input-group-addon">Buscar</span>
+        </div>
+      </div>
+      <button class="btn btn-success" data-toggle="modal" data-target="#create-consumo">Nova Nota</button>
+    </div>
+  </div>
+</div>
+
+<table class="table table-bordered pagin-table">
+  <thead>
+    <tr>
+      <th>Nº</th>
+      <th>Data</th>
+      <th>Litros</th>
+      <th>Litro R$</th>
+      <th>Total R$</th>
+      <th>KM Inicial</th>
+      <th>KM Final</th>
+      <th>KM Rodados</th>
+      <th>Média Km/L</th>
+      <th>Custo Km/L</th>
+      <th width="220px">Operações</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr dir-paginate="value in data | itemsPerPage:5" total-items="totalItems">
+      <td>{{ $index + 1 }}</td>
+      <td>{{ value.data | date : 'dd/MM/yyyy' }}</td>
+      <td>{{ value.litros }}</td>
+      <td>{{ value.valor }}</td>
+      <td>{{ (value.litros * value.valor) | number:2 }}</td>
+      <td>{{ value.km_inicial }}</td>
+      <td>{{ value.km_final }}</td>
+      <td>{{ value.km_final - value.km_inicial }}</td>
+      <td>{{ ((value.km_final - value.km_inicial) / value.litros ) | number:0 }}</td>
+      <td>{{ ((value.litros * value.valor) / (value.km_final - value.km_inicial) ) | number:2 }}</td>
+      <td>
+        <button data-toggle="modal" ng-click="edit(value.id)" data-target="#edit-data" class="btn btn-primary">Editar</button>
+        <button ng-click="remove(value,$index)" class="btn btn-danger">Excluir</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<dir-pagination-controls class="pull-right" on-page-change="pageChanged(newPageNumber)" template-url="templates/dirPagination" ></dir-pagination-controls>
+
+<!-- Create Modal -->
+<div class="modal fade" id="create-consumo" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form method="POST" name="addItem" role="form" ng-submit="saveAdd()">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+          <h4 class="modal-title" id="myModalLabel">Criar Consumo</h4>
+        </div>
+        <div class="modal-body">
+          <div class="container">
+            <div class="row">
+              <div class="col-xs-12 col-sm-12 col-md-12">
+                <strong>Título : </strong>
+                <div class="form-group">
+                  <input ng-model="form.titulo" type="text" placeholder="Título" name="titulo" class="form-control" required />
+                </div>
+              </div>
+              <div class="col-xs-12 col-sm-12 col-md-12">
+                <strong>Data : </strong>
+                <div class="form-group">
+                  <textarea ng-model="form.data" class="form-control" required>
+                  </textarea>
+                </div>
+              </div>
+              <div class="col-xs-12 col-sm-12 col-md-12">
+                <strong>Litros : </strong>
+                <div class="form-group">
+                  <textarea ng-model="form.litros" class="form-control" required>
+                  </textarea>
+                </div>
+              </div>
+              <div class="col-xs-12 col-sm-12 col-md-12">
+                <strong>Valor : </strong>
+                <div class="form-group">
+                  <textarea ng-model="form.valor" class="form-control" required>
+                  </textarea>
+                </div>
+              </div>
+              <div class="col-xs-12 col-sm-12 col-md-12">
+                <strong>Km inicial : </strong>
+                <div class="form-group">
+                  <textarea ng-model="form.km_inicial" class="form-control" required>
+                  </textarea>
+                </div>
+              </div>
+              <div class="col-xs-12 col-sm-12 col-md-12">
+                <strong>KM final : </strong>
+                <div class="form-group">
+                  <textarea ng-model="form.km_final" class="form-control" required>
+                  </textarea>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+            <button type="submit" ng-disabled="addItem.$invalid" class="btn btn-primary">Salvar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="edit-data" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form method="POST" name="editItem" role="form" ng-submit="saveEdit()">
+        <input ng-model="form.id" type="hidden" placeholder="Título" name="titulo" class="form-control" />
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+          <h4 class="modal-title" id="myModalLabel">Editar Nota</h4>
+        </div>
+        <div class="modal-body">
+          <div class="container">
+            <div class="row">
+              <div class="col-xs-12 col-sm-12 col-md-12">
+                <strong>Data : </strong>
+                <div class="form-group">
+                  <textarea ng-model="form.data" class="form-control" required>
+                  </textarea>
+                </div>
+              </div>
+              <div class="col-xs-12 col-sm-12 col-md-12">
+                <strong>Litros : </strong>
+                <div class="form-group">
+                  <textarea ng-model="form.litros" class="form-control" required>
+                  </textarea>
+                </div>
+              </div>
+              <div class="col-xs-12 col-sm-12 col-md-12">
+                <strong>Valor : </strong>
+                <div class="form-group">
+                  <textarea ng-model="form.valor" class="form-control" required>
+                  </textarea>
+                </div>
+              </div>
+              <div class="col-xs-12 col-sm-12 col-md-12">
+                <strong>Km inicial : </strong>
+                <div class="form-group">
+                  <textarea ng-model="form.km_inicial" class="form-control" required>
+                  </textarea>
+                </div>
+              </div>
+              <div class="col-xs-12 col-sm-12 col-md-12">
+                <strong>Km final : </strong>
+                <div class="form-group">
+                  <textarea ng-model="form.km_final" class="form-control" required>
+                  </textarea>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+            <button type="submit" ng-disabled="editItem.$invalid" class="btn btn-primary create-crud">Salvar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
